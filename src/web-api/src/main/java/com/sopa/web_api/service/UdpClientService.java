@@ -24,6 +24,7 @@ public class UdpClientService {
             InetAddress address = InetAddress.getByName(SERVER_HOST);
             byte[] buf = message.getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length, address, SERVER_PORT);
+            logger.info("Sending to {}:{}: {}", address, SERVER_PORT, message);
             socket.send(packet);
 
             byte[] recBuf = new byte[4096]; // Larger buffer for board data
@@ -31,6 +32,7 @@ public class UdpClientService {
             socket.receive(responsePacket);
 
             String received = new String(responsePacket.getData(), 0, responsePacket.getLength());
+            logger.info("Received from {}:{}: {}", responsePacket.getAddress(), responsePacket.getPort(), received);
             return received; // Return raw data
         } catch (Exception e) {
             logger.error("Error communicating with Game UDP Server", e);

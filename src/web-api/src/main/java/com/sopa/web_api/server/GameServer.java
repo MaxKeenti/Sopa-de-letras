@@ -61,6 +61,7 @@ public class GameServer extends Thread {
 
                 DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, clientAddress,
                         clientPort);
+                logger.info("Sending response to {}:{}: {}", clientAddress, clientPort, response);
                 socket.send(responsePacket);
 
             } catch (IOException e) {
