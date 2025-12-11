@@ -49,40 +49,72 @@
 #v(1cm)
 
 #set align(center)
-#title("COMPROBACIÓN LÓGICA DE CABLEADO Y CONECTIVIDAD DE UNA RED DE ÁREA LOCAL")
+#title("PRÁCTICA FINAL: SOPA DE LETRAS")
 #set align(left)
 
-= Sección
+= Introducción
 
-== Subsección
-#lorem(15)
+El juego "Sopa de letras" consiste en un tablero de 15 filas por 15 columnas lleno de letras. Algunas de las filas, columnas o diagonales que forman las letras sobre el tablero dan lugar a palabras sobre un tema común planteado.
 
-=== Subsubsección
-#lorem(15)
+El objetivo de esta práctica es implementar dicho juego utilizando una arquitectura Cliente-Servidor mediante Sockets de Datagrama (UDP) y el uso de hilos (threads) para la gestión de la comunicación y la interfaz de usuario.
 
-==== Subsubsubsección
-#lorem(15)
+= Desarrollo
 
-== Subsección
-#lorem(15)
+== Arquitectura del Sistema
 
-=== Subsubsección
-#lorem(15)
+El sistema se divide en dos componentes principales: el Servidor y el Cliente.
 
-==== Subsubsubsección
-#lorem(15)
+=== Servidor
+El servidor es responsable de:
+- Generar el tablero de juego de 15x15 con palabras aleatorias.
+- Gestionar las sesiones de juego (aunque UDP es sin conexión, se rastrea el estado lógico).
+- Validar las palabras encontradas por el cliente.
+- Registrar los tiempos de finalización de los jugadores.
 
-== Subsección
-#lorem(15)
+El servidor escucha en el puerto UDP 5000 por defecto.
 
-=== Subsubsección
-#lorem(15)
+=== Cliente
+El cliente es una aplicación de escritorio (Java Swing) que permite al usuario:
+- Conectarse al servidor.
+- Visualizar el tablero de juego.
+- Seleccionar palabras arrastrando el mouse.
+- Visualizar el tiempo transcurrido y las palabras encontradas.
 
-==== Subsubsubsección
-#lorem(15)
+== Protocolo de Comunicación
+
+Se diseñó un protocolo simple basado en texto sobre UDP:
+
+- *START:\<Nombre\>* : El cliente solicita iniciar un juego.
+- *BOARD:\<Datos\>* : El servidor responde con el tablero serializado.
+- *FOUND:\<Palabra\>* : El cliente envía una palabra seleccionada.
+- *VALID:\<Palabra\>* / *INVALID* : El servidor confirma si la palabra es correcta.
+- *FINISH:\<Nombre\>,\<Tiempo\>* : El cliente notifica que terminó.
+- *ACK_FINISH* : El servidor confirma el registro del tiempo.
+
+== Implementación
+
+Se utilizaron las siguientes clases Java:
+
+- `Server.java`: Clase principal del servidor.
+- `BoardGenerator.java`: Lógica de generación de sopa de letras.
+- `Client.java`: Clase principal del cliente e interfaz gráfica.
+- `NetworkClient.java`: Gestión de sockets UDP en el cliente.
+
+= Pruebas
+
+A continuación se muestran las pruebas de funcionamiento:
 
 #figure(
-  image("media/foto1_placeholder.jpg", width: 40%),
-  caption: [Placeholder],
+  image("media/foto1_placeholder.jpg", width: 80%),
+  caption: [Interfaz del Cliente con el tablero cargado],
 )
+
+#figure(
+  image("media/foto1_placeholder.jpg", width: 80%),
+  caption: [Validación de palabras encontradas],
+)
+
+= Conclusión
+
+Se logró implementar existosamente el juego de Sopa de Letras cumpliendo con los requisitos de utilizar Sockets de Datagrama y Hilos. La arquitectura elegida permite una comunicación fluida y la lógica del servidor garantiza que el juego sea justo al validar las palabras centralizadamente.
 
