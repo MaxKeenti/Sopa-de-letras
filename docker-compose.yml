@@ -1,0 +1,23 @@
+services:
+  web-api:
+    build: 
+      context: ./src/web-api
+    ports:
+      - "8080:8080"
+      - "9876:9876/udp"
+    networks:
+      - sopa-net
+
+  web-client:
+    build: 
+      context: ./src/web-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - web-api
+    networks:
+      - sopa-net
+
+networks:
+  sopa-net:
+    driver: bridge
