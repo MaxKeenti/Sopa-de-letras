@@ -1,9 +1,0 @@
-com/sopa/web/GameController$ValidateResponse.class
-com/sopa/web/SopaApplication.class
-com/sopa/web/GameController.class
-com/sopa/web/GameController$GenericResponse.class
-com/sopa/web/GameController$StartRequest.class
-com/sopa/web/GameController$ValidateRequest.class
-com/sopa/web/GameController$BoardResponse.class
-com/sopa/web/UdpService.class
-com/sopa/web/GameController$FinishRequest.class
