@@ -6,6 +6,7 @@ function App() {
   const [board, setBoard] = useState([]);
   const [targetWords, setTargetWords] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
+  const [foundCells, setFoundCells] = useState(new Set()); // Strings "r-c"
   const [selectionStart, setSelectionStart] = useState(null); // {r, c}
   const [message, setMessage] = useState({ text: "Presiona Iniciar para Jugar", type: "info" });
   const [gameActive, setGameActive] = useState(false);
@@ -19,6 +20,7 @@ function App() {
       setBoard(data.board.map(row => row.split('')));
       setTargetWords(data.words);
       setFoundWords([]);
+      setFoundCells(new Set());
       setSelectionStart(null);
       setGameActive(true);
       setStartTime(Date.now());
@@ -56,13 +58,13 @@ function App() {
       const result = await validateWord(formedWord);
       
       if (result.status === 'valid') {
-         processFoundWord(formedWord);
+         processFoundWord(formedWord, path);
       } else {
          // Try reverse
          const reverseWord = formedWord.split('').reverse().join('');
          const resReverse = await validateWord(reverseWord);
          if (resReverse.status === 'valid') {
-             processFoundWord(reverseWord);
+             processFoundWord(reverseWord, path); // Pass same path, order doesn't matter for highlighting
          } else {
              setMessage({ text: `Palabra incorrecta: ${formedWord}`, type: "error" });
          }
@@ -72,10 +74,18 @@ function App() {
     }
   };
 
-  const procesFoundWord = (word) => {
+  const procesFoundWord = (word, path) => {
       if (!foundWords.includes(word)) {
            const newFound = [...foundWords, word];
            setFoundWords(newFound);
+           
+           // Update found cells
+           const newFoundCells = new Set(foundCells);
+           path.forEach(cell => {
+               newFoundCells.add(`${cell.r}-${cell.c}`);
+           });
+           setFoundCells(newFoundCells);
+
            setMessage({ text: `¡Encontrado: ${word}!`, type: "success" });
            
            if (newFound.length === targetWords.length) {
@@ -116,8 +126,6 @@ function App() {
 
   const isSelected = (r, c) => {
       if (selectionStart && selectionStart.r === r && selectionStart.c === c) return true;
-      // Note: We don't visualize the path dynamically on hover yet, only start point.
-      // If we wanted to, we'd need tracking hover state.
       return false;
   };
 
@@ -149,7 +157,6 @@ function App() {
           <button onClick={handleStart} disabled={gameActive && foundWords.length < targetWords.length}>
               {gameActive ? "Reiniciar" : "Iniciar Juego"}
           </button>
-          {/* Removed Validate Button */}
       </div>
 
       <div className={`message-banner ${message.type}`}>
@@ -165,6 +172,7 @@ function App() {
                               key={`${rIndex}-${cIndex}`} 
                               className={`cell 
                                   ${isSelected(rIndex, cIndex) ? 'selected-start' : ''}
+                                  ${foundCells.has(`${rIndex}-${cIndex}`) ? 'found-cell' : ''}
                                   `}
                               onClick={() => handleCellClick(rIndex, cIndex)}
                           >

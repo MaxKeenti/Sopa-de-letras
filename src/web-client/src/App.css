@@ -113,6 +113,13 @@
   animation: pulse 1s;
 }
 
+.found-cell {
+    background-color: #4caf50 !important; /* Force override */
+    color: white !important;
+    animation: pulse 0.5s;
+    border-color: #388e3c;
+}
+
 /* Modal Styles */
 .modal-overlay {
     position: fixed;
