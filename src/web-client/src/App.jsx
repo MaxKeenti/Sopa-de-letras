@@ -7,12 +7,12 @@ function App() {
   const [targetWords, setTargetWords] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
   const [selectedCells, setSelectedCells] = useState([]);
-  const [message, setMessage] = useState("Press Start to Play");
+  const [message, setMessage] = useState("Presiona Iniciar para Jugar");
   const [gameActive, setGameActive] = useState(false);
   const [startTime, setStartTime] = useState(null);
 
   const handleStart = async () => {
-    setMessage("Loading...");
+    setMessage("Cargando...");
     const data = await startGame();
     if (data.status === 'ok') {
       setBoard(data.board.map(row => row.split('')));
@@ -21,9 +21,9 @@ function App() {
       setSelectedCells([]);
       setGameActive(true);
       setStartTime(Date.now());
-      setMessage("Find the words!");
+      setMessage("¡Encuentra las palabras!");
     } else {
-      setMessage("Error starting game: " + data.message);
+      setMessage("Error al iniciar el juego: " + data.message);
     }
   };
 
@@ -61,14 +61,14 @@ function App() {
     if (result.status === 'valid') {
        if (!foundWords.includes(formedWord)) {
            setFoundWords([...foundWords, formedWord]);
-           setMessage(`Found: ${formedWord}!`);
+           setMessage(`¡Encontrado: ${formedWord}!`);
            if (foundWords.length + 1 === targetWords.length) {
                const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-               setMessage(`Game Over! Time: ${timeTaken}s`);
+               setMessage(`¡Juego Terminado! Tiempo: ${timeTaken}s`);
                setGameActive(false);
            }
        } else {
-           setMessage(`Already found: ${formedWord}`);
+           setMessage(`Ya encontrado: ${formedWord}`);
        }
        setSelectedCells([]);
     } else {
@@ -78,16 +78,16 @@ function App() {
        if (resReverse.status === 'valid') {
           if (!foundWords.includes(reverseWord)) {
               setFoundWords([...foundWords, reverseWord]);
-              setMessage(`Found: ${reverseWord}!`);
+              setMessage(`¡Encontrado: ${reverseWord}!`);
               if (foundWords.length + 1 === targetWords.length) {
                   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-                  setMessage(`Game Over! Time: ${timeTaken}s`);
+                  setMessage(`¡Juego Terminado! Tiempo: ${timeTaken}s`);
                   setGameActive(false);
               }
           }
            setSelectedCells([]);
        } else {
-           setMessage(`Invalid word: ${formedWord}`);
+           setMessage(`Palabra inválida: ${formedWord}`);
        }
     }
   };
@@ -103,10 +103,10 @@ function App() {
       <h1>Sopa de Letras</h1>
       <div className="controls">
           <button onClick={handleStart} disabled={gameActive && foundWords.length < targetWords.length}>
-              {gameActive ? "Restart" : "Start Game"}
+              {gameActive ? "Reiniciar" : "Iniciar Juego"}
           </button>
           <button onClick={checkSelection} disabled={!gameActive || selectedCells.length === 0}>
-             Validate Selection
+             Validar Selección
           </button>
           <span className="message">{message}</span>
       </div>
@@ -131,7 +131,7 @@ function App() {
           </div>
           
           <div className="word-list">
-              <h3>Words to Find</h3>
+              <h3>Palabras a Encontrar</h3>
               <ul>
                   {targetWords.map((word, idx) => (
                       <li key={idx} className={foundWords.includes(word) ? 'found' : ''}>

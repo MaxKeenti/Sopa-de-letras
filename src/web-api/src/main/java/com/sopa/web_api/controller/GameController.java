@@ -36,7 +36,7 @@ public class GameController {
                 result.put("words", words);
             } catch (Exception e) {
                 result.put("status", "error");
-                result.put("message", "Failed to parse board data");
+                result.put("message", "Error al procesar los datos del tablero");
             }
         }
         return result;

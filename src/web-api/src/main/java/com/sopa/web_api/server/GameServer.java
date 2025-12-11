@@ -29,7 +29,7 @@ public class GameServer extends Thread {
 
     // Word list
     private static final List<String> WORDS = Arrays.asList("REDES", "SOCKETS", "UDP", "JAVA", "REACT", "DOCKER",
-            "SERVER", "CLIENT", "PROTOCOL", "API");
+            "SERVIDOR", "CLIENTE", "PROTOCOLO", "API");
 
     public GameServer() {
         try {
@@ -78,10 +78,10 @@ public class GameServer extends Thread {
                 return generateBoard();
             case "VALIDATE_WORD":
                 if (parts.length < 2)
-                    return "ERROR:Missing Word";
+                    return "ERROR:Falta Palabra";
                 return validateWord(parts[1]);
             default:
-                return "ERROR:Unknown Command";
+                return "ERROR:Comando Desconocido";
         }
     }
 
