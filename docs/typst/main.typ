@@ -62,9 +62,9 @@ El proyecto consiste en la implementación de un sistema distribuido para el jue
 
 == 3.1. Arquitectura del Sistema
 El sistema se compone de tres elementos principales:
-+ **Servidor de Juego (UDP)**: Encargado de la lógica del juego, generación de tableros y validación de palabras. Utiliza `DatagramSocket` en Java.
-+ **Web API (Spring Boot)**: Actúa como puente (Gateway) entre el cliente web y el servidor UDP. Recibe peticiones HTTP y las transforma en datagramas UDP.
-+ **Cliente Web (React)**: Interfaz gráfica de usuario moderna que permite interactuar con el juego desde un navegador.
++ *Servidor de Juego (UDP)*: Encargado de la lógica del juego, generación de tableros y validación de palabras. Utiliza `DatagramSocket` en Java.
++ *Web API (Spring Boot)*: Actúa como puente (Gateway) entre el cliente web y el servidor UDP. Recibe peticiones HTTP y las transforma en datagramas UDP.
++ *Cliente Web (React)*: Interfaz gráfica de usuario moderna que permite interactuar con el juego desde un navegador.
 
 == 3.2. Implementación del Servidor (Java)
 El servidor utiliza un hilo (`Thread`) dedicado para escuchar peticiones en el puerto 9876.
