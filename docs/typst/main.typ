@@ -64,21 +64,24 @@ El objetivo de esta práctica es implementar dicho juego utilizando una arquitec
 
 El sistema se divide en dos componentes principales: el Servidor y el Cliente.
 
-=== Servidor
-El servidor es responsable de:
-- Generar el tablero de juego de 15x15 con palabras aleatorias.
-- Gestionar las sesiones de juego (aunque UDP es sin conexión, se rastrea el estado lógico).
-- Validar las palabras encontradas por el cliente.
-- Registrar los tiempos de finalización de los jugadores.
+=== Servidor (Game Server)
+El servidor (componente Java puro) mantiene la lógica central:
+- Escucha en el puerto UDP 5000.
+- Genera tableros y validad palabras.
+- Es desplegado en un contenedor Docker (`game-server`).
 
-El servidor escucha en el puerto UDP 5000 por defecto.
+=== Web Client (Bridge + Frontend)
+Dado que los navegadores no soportan sockets UDP directamente, se implementó una arquitectura de capas:
 
-=== Cliente
-El cliente es una aplicación de escritorio (Java Swing) que permite al usuario:
-- Conectarse al servidor.
-- Visualizar el tablero de juego.
-- Seleccionar palabras arrastrando el mouse.
-- Visualizar el tiempo transcurrido y las palabras encontradas.
+1. *Frontend (React + Vite)*: Interfaz de usuario moderna y responsiva. Se comunica via HTTP con el Backend.
+2. *Backend (Spring Boot BFF)*: Actúa como "Bridge" (Backend For Frontend). Recibe peticiones HTTP del frontend y las traduce a datagramas UDP hacia el Game Server.
+
+Ambos componentes se empaquetan en un único contenedor Docker (`web-client`), donde Spring Boot sirve tanto la API como los archivos estáticos de React.
+
+== Protocolo de Comunicación
+
+El flujo de información es:
+`Browser (React) <--(HTTP)--> Spring Boot <--(UDP)--> Game Server`
 
 == Protocolo de Comunicación
 
@@ -100,6 +103,25 @@ Se utilizaron las siguientes clases Java:
 - `Client.java`: Clase principal del cliente e interfaz gráfica.
 - `NetworkClient.java`: Gestión de sockets UDP en el cliente.
 
+= Despliegue con Docker
+
+El sistema ha sido "dockerizado" para facilitar su ejecución y asegurar que el entorno sea consistente.
+
+Se definieron dos contenedores:
+1. `Dockerfile.server`: Compila y ejecuta el servidor Java UDP utilizando OpenJDK 17.
+2. `Dockerfile.web`: Utiliza un enfoque *multi-stage build*:
+  - Stage 1 (Node.js): Compila el frontend React.
+  - Stage 2 (Maven): Compila el backend Spring Boot e incrusta los estáticos de React.
+  - Stage 3 (JRE): Ejecuta el JAR final optimizado.
+
+Para iniciar el sistema basta con ejecutar:
+
+```bash
+docker compose up
+```
+
+La aplicación web estará disponible en `http://localhost:8080`.
+
 = Pruebas
 
 A continuación se muestran las pruebas de funcionamiento:
@@ -116,5 +138,5 @@ A continuación se muestran las pruebas de funcionamiento:
 
 = Conclusión
 
-Se logró implementar existosamente el juego de Sopa de Letras cumpliendo con los requisitos de utilizar Sockets de Datagrama y Hilos. La arquitectura elegida permite una comunicación fluida y la lógica del servidor garantiza que el juego sea justo al validar las palabras centralizadamente.
+Se logró implementar existosamente el juego de Sopa de Letras cumpliendo con los requisitos de utilizar Sockets de Datagrama e Hilos. La arquitectura elegida permite una comunicación fluida y la lógica del servidor garantiza que el juego sea justo al validar las palabras centralizadamente.
 

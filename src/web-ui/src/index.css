@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.grid-cell {
+    @apply w-10 h-10 border border-gray-300 flex items-center justify-center font-bold text-lg select-none cursor-pointer hover:bg-yellow-100 transition-colors;
+}
+
+.grid-cell.selected {
+    @apply bg-yellow-300;
+}
+
+.grid-cell.found {
+    @apply bg-green-400 text-white;
+}

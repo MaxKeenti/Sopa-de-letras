@@ -1,0 +1,24 @@
+services:
+  game-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "5000:5000/udp"
+    networks:
+      - sopa-network
+
+  web-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "8080:8080"
+    depends_on:
+      - game-server
+    networks:
+      - sopa-network
+
+networks:
+  sopa-network:
+    driver: bridge
