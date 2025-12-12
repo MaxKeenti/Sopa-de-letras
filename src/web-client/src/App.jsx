@@ -203,21 +203,25 @@ function App() {
            targetWordsCount={targetWords.length}
        />
 
-       <GameStatus message={message} />
-       
-       <div className="flex flex-wrap justify-center gap-8 items-start w-full max-w-6xl">
-           <GameBoard 
-               board={board}
-               isSelected={isSelected}
-               foundCells={foundCells}
-               onCellClick={handleCellClick}
-           />
-           
-           <WordList 
-               targetWords={targetWords} 
-               foundWords={foundWords} 
-           />
-       </div>
+       {board.length > 0 && (
+          <>
+             <GameStatus message={message} />
+             
+             <div className="flex flex-wrap justify-center gap-8 items-start w-full max-w-6xl">
+                 <GameBoard 
+                     board={board}
+                     isSelected={isSelected}
+                     foundCells={foundCells}
+                     onCellClick={handleCellClick}
+                 />
+                 
+                 <WordList 
+                     targetWords={targetWords} 
+                     foundWords={foundWords} 
+                 />
+             </div>
+          </>
+       )}
     </div>
   );
 }
