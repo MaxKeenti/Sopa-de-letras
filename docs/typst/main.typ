@@ -1,3 +1,4 @@
+#import "@preview/subpar:0.2.2": *
 #import "portada-template.typ": portada
 
 #let integrantes = (
@@ -51,37 +52,82 @@
 #title("REPORTE DE PRÁCTICA: SOPA DE LETRAS CON SOCKETS UDP")
 #set align(left)
 
-= 1. Objetivo
-El estudiante implementará el juego Sopa de letras utilizando hilos, así como sockets de datagrama.
+= Objetivo
+Implementar un sistema distribuido para el juego "Sopa de Letras", aplicando los fundamentos de la programación en red. El objetivo principal es establecer una comunicación efectiva mediante *Sockets de Datagrama (UDP)* y gestionar la concurrencia a través de *Hilos (Threads)*, cumpliendo con los requisitos de identificación de usuarios, validación lógica y persistencia de datos.
 
-= 2. Competencia Específica
-Desarrolla aplicaciones en red, con base en el modelo cliente-servidor y utilizando sockets de datagrama, así como hilos para el envío de datos a cada uno de los clientes.
+= Competencia Específica
+Desarrollar aplicaciones en red robustas bajo el modelo cliente-servidor, integrando mecanismos de comunicación no orientados a conexión (UDP) y procesamiento concurrente para la atención múltiple de clientes.
 
-= 3. Desarrollo
-El proyecto consiste en la implementación de un sistema distribuido para el juego de Sopa de Letras, utilizando una arquitectura Cliente-Servidor.
+= Desarrollo
+El proyecto materializa una arquitectura moderna y desacoplada, dividida en contenedores Docker para garantizar la portabilidad y escalabilidad.
 
-== 3.1. Arquitectura del Sistema
-El sistema se compone de tres elementos principales:
-+ *Servidor de Juego (UDP)*: Encargado de la lógica del juego, generación de tableros y validación de palabras. Utiliza `DatagramSocket` en Java.
-+ *Web API (Spring Boot)*: Actúa como puente (Gateway) entre el cliente web y el servidor UDP. Recibe peticiones HTTP y las transforma en datagramas UDP.
-+ *Cliente Web (React)*: Interfaz gráfica de usuario moderna que permite interactuar con el juego desde un navegador.
+== Arquitectura del Sistema
+El sistema opera bajo un esquema híbrido que combina la robustez de Java con la interactividad de React:
 
-== 3.2. Implementación del Servidor (Java)
-El servidor utiliza un hilo (`Thread`) dedicado para escuchar peticiones en el puerto 9876.
-- Al recibir `START_GAME`, genera una matriz de 15x15 con palabras aleatorias.
-- Al recibir `VALIDATE_WORD`, verifica la existencia de la palabra.
++ *Cliente Web (Frontend)*: Desarrollado en *React* con *Vite* y estilizado mediante *Tailwind CSS*. Es responsable de la presentación, la captura de eventos del usuario (selección de celdas) y la gestión del estado visual (temas claro/oscuro).
++ *Web API Gateway (Backend)*: Implementado en *Spring Boot*. Expone endpoints REST (`/start`, `/validate`, `/scores`) que actúan como una fachada. Internamente, este componente traduce las peticiones HTTP en paquetes UDP.
++ *Servidor de Juego (UDP/Logic)*: Un componente crítico escrito en Java puro que extiende la clase `Thread`. Escucha en el puerto `9876` y procesa comandos (`START`, `VALIDATE`, `END`) de forma asíncrona.
 
-== 3.3. Implementación del Cliente (React)
-El cliente utiliza `fetch` para comunicarse con la API, renderiza el tablero de forma dinámica y gestiona la selección de celdas por parte del usuario.
+== Características Técnicas Implementadas
 
-= 4. Pruebas y Resultados
-Se verificó el correcto funcionamiento mediante el despliegue en contenedores Docker.
+=== Comunicación por Sockets UDP
+La comunicación interna no utiliza TCP, sino `DatagramSocket`, lo que permite un intercambio de mensajes ligero ("Fire and forget").
+- *Protocolo Definido*: Se diseñó un protocolo de texto simple: `COMANDO:DATOS:JUGADOR`.
+- *Ejemplo*: `VALIDATE_WORD:JAVA:Max` envía la palabra "JAVA" intentada por el jugador "Max".
+
+=== Concurrencia y Manejo de Sesiones
+El servidor mantiene un `Map<String, List<String>>` para gestionar el estado de cada jugador de forma aislada.
+- *Aleatoriedad por Hilo*: Cada vez que un jugador inicia, se seleccionan 10 palabras únicas de un diccionario maestro (que incluye términos como `DOCKER`, `ANGULAR`, `PYTHON`), asegurando que cada partida sea única.
+- *Validación Contextual*: El servidor valida la palabra contra la lista específica de *ese* jugador, previniendo condiciones de carrera o validaciones cruzadas incorrectas.
+
+=== Persistencia de Datos y Docker Volumes
+Uno de los retos principales fue la persistencia en un entorno efímero como Docker.
+- Se implementó la escritura en un archivo plano `scores.txt` (`FileWriter` en modo append).
+- *Solución de Infraestructura*: Se configuró un *volumen* en `docker-compose.yml` (`./scores.txt:/scores.txt`) para mapear el archivo del contenedor al sistema de archivos del anfitrión (Host), garantizando que los puntajes históricos ("Leaderboard") sobrevivan al reinicio de los contenedores.
+
+=== Interfaz de Usuario (UI/UX)
+Se priorizó la experiencia de usuario con:
+- *Tema Dinámico*: Soporte para modo oscuro/claro automático basado en preferencias del sistema.
+- *Feedback Visual*: Retroalimentación inmediata (colores verde/rojo) al validar palabras.
+- *Leaderboard*: Una ventana modal que consume el endpoint `/scores` para mostrar los tiempos históricos.
+
+= Pruebas y Resultados
+El despliegue se realiza mediante `docker compose up --build`.
+
+*Pruebas de Integración* @fig:pruebas:
++ *Inicio*: El cliente envía el nombre, el servidor reserva las 10 palabras y retorna la matriz.
++ *Juego*: El usuario selecciona "JAVA". El cliente envía la petición, el servidor confirma y actualiza el puntaje en memoria.
++ *Finalización*: Al encontrar las 10 palabras, el cliente envía el tiempo total. El servidor escribe en `scores.txt` de manera sincronizada (`synchronized`) para evitar corrupción por escritura concurrente.
 
 #figure(
-  image("media/foto1_placeholder.jpg", width: 80%),
-  caption: [Interfaz del Juego Sopa de Letras],
+  grid(
+    columns: 2,
+    // Creates two auto-sized columns
+    gutter: 5mm,
+    // Space between columns
+    image("media/foto2.png", width: 100%),
+    // Content for the first cell
+    image("media/foto3.png", width: 100%),
+    // Content for the second cell
+    image("media/foto4.png", width: 100%),
+    // Content for the third cell
+    image("media/foto5.png", width: 100%),
+    // Content for the fourth cell
+  ),
+  caption: [Aplicación funcionando], // Caption for the entire figure
+) <fig:pruebas>
+
+
+#figure(
+  image("media/foto1.png", width: 100%),
+  caption: [Arquitectura de Contenedores y Flujo de Datos],
 )
 
-= 5. Conclusiones
-Se logró implementar exitosamente la comunicación mediante Sockets UDP, integrando tecnologías modernas como React y Sprint Boot. El uso de Hilos permitió al servidor manejar las peticiones de juego de manera concurrente (simulada en este diseño por la naturaleza de UDP). La arquitectura en contenedores facilita el despliegue y pruebas del sistema.
+= Conclusiones
+Como equipo, este proyecto nos permitió consolidar conocimientos clave en sistemas distribuidos. Aprendimos que:
+- *UDP vs TCP*: Aunque UDP no garantiza entrega, su simplicidad es ideal para mensajes cortos y rápidos dentro de una red controlada (como la red interna de Docker).
+- *Gestión de Estado*: Mantener el estado del juego en el servidor (palabras por jugador) es crucial para la seguridad y consistencia lógica.
+- *Dockerización*: La contenedorización no es solo "empaquetar", sino entender cómo interactúa el sistema de archivos del contenedor con el mundo exterior (Volumes), un punto donde inicialmente tuvimos dificultades pero logramos resolver eficazmente.
+- *Full Stack*: La integración de un Frontend reactivo con un Backend robusto en Java demuestra la versatilidad necesaria en el desarrollo de software moderno.
 
+El resultado final es una aplicación resiliente, estéticamente agradable y funcionalmente completa que cumple con todos los requerimientos académicos planteados.
