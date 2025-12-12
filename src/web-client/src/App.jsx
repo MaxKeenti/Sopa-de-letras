@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { startGame, validateWord } from './services/api';
+import { startGame, validateWord, endGame } from './services/api';
 import InstructionsModal from './components/InstructionsModal';
 import GameControls from './components/GameControls';
 import GameStatus from './components/GameStatus';
@@ -154,8 +154,12 @@ function App() {
            
            if (newFound.length === targetWords.length) {
                const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
-               setMessage({ text: `¡Juego Terminado! Tiempo: ${formatTime(totalSeconds)}`, type: "success" });
+               const timeFormatted = formatTime(totalSeconds);
+               setMessage({ text: `¡Juego Terminado! Tiempo: ${timeFormatted}`, type: "success" });
                setGameActive(false);
+               
+               // Save score
+               endGame(playerName, timeFormatted);
            }
        } else {
            setMessage({ text: `Ya encontrado: ${word}`, type: "warning" });
