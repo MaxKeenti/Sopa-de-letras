@@ -90,33 +90,40 @@ public class GameServer extends Thread {
         char[][] board = new char[SIZE][SIZE];
         Random random = new Random();
 
-        // Fill with random letters
+        // 1. Initialize board with placeholders (0)
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                board[i][j] = (char) ('A' + random.nextInt(26));
+                board[i][j] = 0;
             }
         }
 
-        // Place words (Simplified - mostly horizontal/vertical for reliability in demo)
-        // Ideally checking for collisions.
+        // 2. Place words with collision checking
+        Collections.shuffle(WORDS); // Shuffle to randomize positions each game
         for (String word : WORDS) {
             placeWord(board, word, random);
         }
 
-        // Convert board to String (e.g., JSON or CSV like)
-        // Let's use a simple CSV format: ROW1,ROW2,... where ROW is chars
+        // 3. Fill remaining spots with random letters
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (board[i][j] == 0) {
+                    board[i][j] = (char) ('A' + random.nextInt(26));
+                }
+            }
+        }
+
+        // Convert board to String (CSV format)
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < SIZE; i++) {
             sb.append(new String(board[i]));
             if (i < SIZE - 1)
                 sb.append(",");
         }
-        sb.append(";").append(String.join(",", WORDS)); // Append word list at the end
+        sb.append(";").append(String.join(",", WORDS));
         return sb.toString();
     }
 
     private void placeWord(char[][] board, String word, Random random) {
-        // Very basic placement: Try 100 times to place a word
         int attempts = 0;
         boolean placed = false;
         while (attempts < 100 && !placed) {
@@ -130,30 +137,65 @@ public class GameServer extends Thread {
             }
             attempts++;
         }
+        if (!placed) {
+            logger.warn("Could not place word: {}", word);
+        }
     }
 
     private boolean canPlace(char[][] board, String word, int row, int col, int dir) {
+        int len = word.length();
+
+        // Boundary checks
         if (dir == 0) { // Horizontal
-            if (col + word.length() > SIZE)
+            if (col + len > SIZE)
                 return false;
         } else if (dir == 1) { // Vertical
-            if (row + word.length() > SIZE)
+            if (row + len > SIZE)
                 return false;
         } else { // Diagonal
-            if (col + word.length() > SIZE || row + word.length() > SIZE)
+            if (col + len > SIZE || row + len > SIZE)
                 return false;
+        }
+
+        // Collision checks
+        for (int i = 0; i < len; i++) {
+            int r = row;
+            int c = col;
+
+            if (dir == 0)
+                c += i;
+            else if (dir == 1)
+                r += i;
+            else {
+                r += i;
+                c += i;
+            }
+
+            char current = board[r][c];
+            // If cell is not empty AND not matching the character we want to place =>
+            // Collision
+            if (current != 0 && current != word.charAt(i)) {
+                return false;
+            }
         }
         return true;
     }
 
     private void doPlace(char[][] board, String word, int row, int col, int dir) {
         for (int i = 0; i < word.length(); i++) {
+            int r = row;
+            int c = col;
+
             if (dir == 0)
-                board[row][col + i] = word.charAt(i);
+                c += i;
             else if (dir == 1)
-                board[row + i][col] = word.charAt(i);
-            else
-                board[row + i][col + i] = word.charAt(i);
+                r += i;
+            else {
+                r += i;
+                c += i;
+            }
+
+            board[r][c] = word.charAt(i);
         }
     }
 
