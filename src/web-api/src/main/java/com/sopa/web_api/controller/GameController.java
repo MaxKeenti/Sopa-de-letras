@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/game")
@@ -64,5 +66,25 @@ public class GameController {
         Map<String, String> result = new HashMap<>();
         result.put("status", "ok");
         return result;
+    }
+
+    @GetMapping("/scores")
+    public List<Map<String, String>> getScores() {
+        List<Map<String, String>> scores = new ArrayList<>();
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader("scores.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2) {
+                    Map<String, String> entry = new HashMap<>();
+                    entry.put("name", parts[0]);
+                    entry.put("time", parts[1]);
+                    scores.add(entry);
+                }
+            }
+        } catch (Exception e) {
+            // File might not exist yet or error reading
+        }
+        return scores;
     }
 }

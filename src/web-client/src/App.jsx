@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { startGame, validateWord, endGame } from './services/api';
+import { startGame, validateWord, endGame, getScores } from './services/api';
 import InstructionsModal from './components/InstructionsModal';
 import GameControls from './components/GameControls';
 import GameStatus from './components/GameStatus';
 import GameBoard from './components/GameBoard';
 import WordList from './components/WordList';
+import Leaderboard from './components/Leaderboard';
 
 function App() {
   const [board, setBoard] = useState([]);
@@ -21,6 +22,8 @@ function App() {
   const [theme, setTheme] = useState('auto'); // 'light', 'dark', 'auto'
 
   const [playerName, setPlayerName] = useState('');
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [scores, setScores] = useState([]);
 
   // Theme effect
   useEffect(() => {
@@ -214,6 +217,17 @@ function App() {
            targetWordsCount={targetWords.length}
            playerName={playerName}
            setPlayerName={setPlayerName}
+           onShowLeaderboard={async () => {
+               const data = await getScores();
+               setScores(data);
+               setShowLeaderboard(true);
+           }}
+       />
+
+       <Leaderboard 
+           show={showLeaderboard}
+           onClose={() => setShowLeaderboard(false)}
+           scores={scores}
        />
 
        {board.length > 0 && (

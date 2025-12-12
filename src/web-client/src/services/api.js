@@ -41,3 +41,16 @@ export const endGame = async (playerName, time) => {
         return { status: 'error' };
     }
 };
+
+export const getScores = async () => {
+    try {
+        const response = await fetch(`${API_URL}/scores`);
+        if (response.ok) {
+            return await response.json();
+        }
+        return [];
+    } catch (error) {
+        console.error("Error fetching scores:", error);
+        return [];
+    }
+};
