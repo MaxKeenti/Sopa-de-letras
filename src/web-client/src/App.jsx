@@ -26,9 +26,9 @@ function App() {
       }
       
       if (isDark) {
-        document.body.classList.add('dark-theme');
+        document.documentElement.classList.add('dark');
       } else {
-        document.body.classList.remove('dark-theme');
+        document.documentElement.classList.remove('dark');
       }
     };
 
@@ -182,36 +182,36 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col items-center p-8 transition-colors duration-300">
        {showInstructions && (
-          <div className="modal-overlay">
-              <div className="modal-content">
-                  <h2>Cómo Jugar</h2>
-                  <ul>
+          <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl max-w-lg text-center shadow-2xl">
+                  <h2 className="text-2xl font-bold text-yellow-500 mb-4">Cómo Jugar</h2>
+                  <ul className="text-left mb-6 space-y-2 dark:text-gray-200">
                       <li>Presiona <strong>Iniciar Juego</strong> para comenzar.</li>
                       <li>Busca las palabras listadas en la sopa de letras.</li>
                       <li>Para seleccionar una palabra:
-                          <ol>
+                          <ol className="list-decimal ml-6 mt-1">
                               <li>Haz click en la <strong>primera letra</strong>.</li>
                               <li>Haz click en la <strong>última letra</strong>.</li>
                           </ol>
                       </li>
                       <li>La selección debe ser horizontal, vertical o diagonal.</li>
                   </ul>
-                  <button className="modal-button" onClick={() => setShowInstructions(false)}>¡Entendido!</button>
+                  <button className="btn bg-green-500 hover:bg-green-600 w-full" onClick={() => setShowInstructions(false)}>¡Entendido!</button>
               </div>
           </div>
       )}
 
-      <h1>Sopa de Letras</h1>
+      <h1 className="text-5xl font-bold mb-8 tracking-wider">Sopa de Letras</h1>
       
-      <div className="controls">
-          <button onClick={handleStart} disabled={gameActive && foundWords.length < targetWords.length}>
+      <div className="flex flex-wrap gap-4 items-center mb-6 w-full max-w-4xl justify-center">
+          <button className="btn" onClick={handleStart} disabled={gameActive && foundWords.length < targetWords.length}>
               {gameActive ? "Reiniciar" : "Iniciar Juego"}
           </button>
           
           <select 
-             className="theme-selector"
+             className="theme-select"
              value={theme} 
              onChange={(e) => setTheme(e.target.value)}
           >
@@ -220,22 +220,31 @@ function App() {
               <option value="auto">Auto</option>
           </select>
 
-          {gameActive && <div className="timer">Tiempo: {formatTime(elapsedTime)}</div>}
+          {gameActive && (
+              <div className="px-4 py-2 bg-gray-800 text-yellow-500 font-mono text-xl rounded border border-gray-600">
+                  {formatTime(elapsedTime)}
+              </div>
+          )}
       </div>
 
-      <div className={`message-banner ${message.type}`}>
+      <div className={`w-full max-w-md p-3 mb-6 rounded text-center font-bold text-white shadow transition-all ${
+          message.type === 'error' ? 'bg-red-500' :
+          message.type === 'success' ? 'bg-green-500' :
+          message.type === 'warning' ? 'bg-orange-500' :
+          'bg-blue-500'
+      }`}>
           {message.text}
       </div>
       
-      <div className="game-container">
-          <div className="board">
+      <div className="flex flex-wrap justify-center gap-8 items-start w-full max-w-6xl">
+          <div className="flex flex-col gap-1 p-3 bg-gray-800 dark:bg-black rounded-lg shadow-2xl overflow-x-auto">
               {board.map((row, rIndex) => (
-                  <div key={rIndex} className="row">
+                  <div key={rIndex} className="flex gap-1">
                       {row.map((letter, cIndex) => (
                           <div 
                               key={`${rIndex}-${cIndex}`} 
                               className={`cell 
-                                  ${isSelected(rIndex, cIndex) ? 'selected-start' : ''}
+                                  ${isSelected(rIndex, cIndex) ? 'cell-start' : ''}
                                   ${foundCells.has(`${rIndex}-${cIndex}`) ? 'found-cell' : ''}
                                   `}
                               onClick={() => handleCellClick(rIndex, cIndex)}
@@ -247,11 +256,15 @@ function App() {
               ))}
           </div>
           
-          <div className="word-list">
-              <h3>Palabras a Encontrar</h3>
-              <ul>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg min-w-[200px]">
+              <h3 className="text-xl font-bold mb-4 border-b pb-2 dark:border-gray-700">Palabras</h3>
+              <ul className="space-y-2">
                   {targetWords.map((word, idx) => (
-                      <li key={idx} className={foundWords.includes(word) ? 'found' : ''}>
+                      <li key={idx} className={`px-3 py-2 rounded transition-all ${
+                          foundWords.includes(word) 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 line-through' 
+                          : 'bg-gray-100 dark:bg-gray-700'
+                      }`}>
                           {word}
                       </li>
                   ))}

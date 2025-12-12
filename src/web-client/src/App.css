@@ -1,305 +1,42 @@
-:root {
-  --bg-color: #f0f0f0;
-  --text-color: #333;
-  --text-secondary: #666;
-  --primary-color: #2196f3;
-  --secondary-color: #f0f0f0;
-  --board-bg: #333;
-  --cell-bg: #fff;
-  --cell-bg-hover: #eee;
-  --cell-text: #000;
-  --modal-bg: rgba(0, 0, 0, 0.7);
-  --modal-content-bg: #fff;
-  --modal-text: #333;
-  --border-color: #ccc;
-  --btn-bg: #1a1a1a;
-  --btn-text: #fff;
-  --btn-hover: #646cff;
-  --highlight-start: #ff9900;
-  --highlight-selected: #ffd700;
-  --success-bg: #4caf50;
-  --success-text: #fff;
-  --warning-bg: #ff9800;
-  --error-bg: #f44336;
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer components {
+    .btn {
+        @apply px-4 py-2 bg-gray-900 text-white rounded hover:bg-indigo-600 transition-colors cursor-pointer border-none font-medium;
+    }
+    .btn:disabled {
+        @apply bg-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500;
+    }
+    
+    .cell {
+        @apply w-8 h-8 flex items-center justify-center font-bold cursor-pointer select-none transition-colors bg-white text-black hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700;
+    }
+    
+    .cell-selected {
+        @apply bg-blue-300 dark:bg-blue-700;
+    }
+    
+    .cell-start {
+        @apply bg-orange-400 dark:bg-orange-600 scale-110!;
+    }
+    
+    .found-cell {
+        @apply bg-green-500 dark:bg-green-700 text-white border-green-700 animate-pulse;
+    }
+
+    .theme-select {
+        @apply appearance-none px-2 py-1 bg-gray-900 text-white border border-gray-600 rounded cursor-pointer dark:bg-gray-700 dark:border-gray-500 text-center;
+    }
 }
 
-body.dark-theme {
-  --bg-color: #1a1a1a;
-  --text-color: #f0f0f0;
-  --text-secondary: #aaa;
-  --board-bg: #000;
-  --cell-bg: #333;
-  --cell-bg-hover: #444;
-  --cell-text: #fff;
-  --modal-content-bg: #2a2a2a;
-  --modal-text: #fff;
-  --btn-bg: #444;
+/* Custom animation not in default tailwind */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.App {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-  min-height: 100vh;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.title {
-   font-size: 3rem;
-   color: var(--text-color);
-}
-
-.controls {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.theme-selector {
-    padding: 0.5em;
-    font-size: 1rem;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.message {
-    font-weight: bold;
-    color: var(--text-secondary);
-    margin-left: 1rem;
-}
-
-.game-container {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-}
-
-.board {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    background: var(--board-bg);
-    padding: 5px;
-    border-radius: 8px;
-}
-
-.row {
-    display: flex;
-    gap: 2px;
-}
-
-.cell {
-    width: 30px;
-    height: 30px;
-    background: var(--cell-bg);
-    color: var(--cell-text);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.2s;
-}
-
-.cell:hover {
-    background: var(--cell-bg-hover);
-}
-
-.cell.selected {
-    background: #88ccff;
-}
-
-.word-list {
-    text-align: left;
-    min-width: 150px;
-}
-
-.word-list ul {
-    list-style: none;
-    padding: 0;
-}
-
-.word-list li {
-    padding: 4px 8px;
-    margin: 2px 0;
-    background: var(--secondary-color);
-    color: var(--text-color);
-    border-radius: 4px;
-}
-
-/* Dark theme logic for secondary background needs adjustment */
-body.dark-theme .word-list li {
-    background: #333;
-}
-
-.word-list li.found {
-    background: #88ff88; /* Keep standard for visibility or update var */
-    text-decoration: line-through;
-    color: #004400;
-}
-
-body.dark-theme .word-list li.found {
-    background: #2e7d32;
-    color: #fff;
-    text-decoration: line-through;
-}
-
-.selected {
-  background-color: var(--highlight-selected);
-  color: black;
-  transform: scale(1.1);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
-
-.selected-start {
-    background-color: var(--highlight-start);
-    transform: scale(1.15);
-}
-
-.found {
-  background-color: var(--success-bg);
-  color: var(--success-text);
-  animation: pulse 1s;
-}
-
-.found-cell {
-    background-color: var(--success-bg) !important;
-    color: var(--success-text) !important;
+.animate-pulse {
     animation: pulse 0.5s;
-    border-color: #388e3c;
-}
-
-/* Modal Styles */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--modal-bg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: var(--modal-content-bg);
-    padding: 2rem;
-    border-radius: 15px;
-    max-width: 500px;
-    text-align: center;
-    color: var(--modal-text);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.modal-content h2 {
-    color: var(--highlight-selected);
-    margin-bottom: 1rem;
-}
-
-.modal-content ul {
-    text-align: left;
-    margin-bottom: 2rem;
-}
-
-.modal-button {
-    background: var(--success-bg);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    transition: transform 0.2s;
-}
-
-.modal-button:hover {
-    transform: scale(1.05);
-}
-
-/* Banner Styles */
-.message-banner {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.message-banner.info {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.message-banner.success {
-    background-color: var(--success-bg);
-    color: white;
-}
-
-.message-banner.error {
-    background-color: var(--error-bg);
-    color: white;
-}
-
-.message-banner.warning {
-    background-color: var(--warning-bg);
-    color: white;
-}
-
-.timer {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--highlight-selected);
-    margin-left: 20px;
-    background: var(--board-bg);
-    padding: 5px 15px;
-    border-radius: 5px;
-    border: 1px solid #555;
-}
-
-button {
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    cursor: pointer;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    border: none;
-    border-radius: 4px;
-    transition: background 0.25s;
-}
-
-button:hover {
-    background: var(--btn-hover);
-}
-
-button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-body.dark-theme button:disabled {
-    background: #555;
-    color: #888;
 }
