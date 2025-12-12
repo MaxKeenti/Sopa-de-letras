@@ -53,4 +53,16 @@ public class GameController {
         result.put("status", response.equals("VALID") ? "valid" : "invalid");
         return result;
     }
+
+    @PostMapping("/end")
+    public Map<String, String> endGame(@RequestBody Map<String, String> payload) {
+        String playerName = payload.getOrDefault("playerName", "Unknown");
+        String time = payload.getOrDefault("time", "00:00");
+
+        udpClientService.sendRequest("END_GAME:" + playerName + ":" + time);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("status", "ok");
+        return result;
+    }
 }

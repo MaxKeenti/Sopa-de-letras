@@ -27,3 +27,17 @@ export const validateWord = async (word, playerName) => {
         return { status: 'invalid' };
     }
 };
+
+export const endGame = async (playerName, time) => {
+    try {
+        const response = await fetch(`${API_URL}/end`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerName, time }),
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Error ending game:", error);
+        return { status: 'error' };
+    }
+};

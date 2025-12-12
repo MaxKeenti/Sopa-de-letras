@@ -95,8 +95,28 @@ public class GameServer extends Thread {
             }
 
             return result;
+        } else if ("END_GAME".equals(command)) {
+            if (parts.length < 3)
+                return "ERROR:Falta Datos";
+            String playerName = parts[1];
+            String time = parts[2];
+
+            saveScore(playerName, time);
+            logger.info("Game Over for {}. Time: {}", playerName, time);
+
+            return "OK";
         } else {
             return "ERROR:Comando Desconocido";
+        }
+    }
+
+    private synchronized void saveScore(String name, String time) {
+        try (java.io.FileWriter fw = new java.io.FileWriter("scores.txt", true);
+                java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+            bw.write(name + "," + time);
+            bw.newLine();
+        } catch (IOException e) {
+            logger.error("Error writing score to file", e);
         }
     }
 
