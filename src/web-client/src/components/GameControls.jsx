@@ -7,15 +7,18 @@ const GameControls = ({ gameActive, onStart, theme, onThemeChange, elapsedTime, 
                 {gameActive ? "Reiniciar" : "Iniciar Juego"}
             </button>
             
-            <select 
-               className="theme-select"
-               value={theme} 
-               onChange={(e) => onThemeChange(e.target.value)}
-            >
-                <option value="light">Claro</option>
-                <option value="dark">Oscuro</option>
-                <option value="auto">Auto</option>
-            </select>
+            <div className="flex items-center gap-2">
+                <label className="text-sm font-semibold dark:text-gray-300">Tema:</label>
+                <select 
+                   className="theme-select"
+                   value={theme} 
+                   onChange={(e) => onThemeChange(e.target.value)}
+                >
+                    <option value="light">Claro</option>
+                    <option value="dark">Oscuro</option>
+                    <option value="auto">Auto</option>
+                </select>
+            </div>
 
             {gameActive && (
                 <div className="px-4 py-2 bg-gray-800 text-yellow-500 font-mono text-xl rounded border border-gray-600">
