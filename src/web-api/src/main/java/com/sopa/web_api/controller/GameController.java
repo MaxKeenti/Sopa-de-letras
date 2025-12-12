@@ -16,8 +16,9 @@ public class GameController {
     private UdpClientService udpClientService;
 
     @PostMapping("/start")
-    public Map<String, Object> startGame() {
-        String response = udpClientService.sendRequest("START_GAME");
+    public Map<String, Object> startGame(@RequestBody Map<String, String> payload) {
+        String playerName = payload.getOrDefault("playerName", "Unknown");
+        String response = udpClientService.sendRequest("START_GAME:" + playerName);
         Map<String, Object> result = new HashMap<>();
 
         if (response.startsWith("ERROR")) {
@@ -45,7 +46,9 @@ public class GameController {
     @PostMapping("/validate")
     public Map<String, String> validateWord(@RequestBody Map<String, String> payload) {
         String word = payload.get("word");
-        String response = udpClientService.sendRequest("VALIDATE_WORD:" + word);
+        String playerName = payload.getOrDefault("playerName", "Unknown");
+
+        String response = udpClientService.sendRequest("VALIDATE_WORD:" + word + ":" + playerName);
         Map<String, String> result = new HashMap<>();
         result.put("status", response.equals("VALID") ? "valid" : "invalid");
         return result;

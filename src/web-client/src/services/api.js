@@ -1,9 +1,11 @@
 const API_URL = '/api/game';
 
-export const startGame = async () => {
+export const startGame = async (playerName) => {
     try {
         const response = await fetch(`${API_URL}/start`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerName }),
         });
         return await response.json();
     } catch (error) {
@@ -12,12 +14,12 @@ export const startGame = async () => {
     }
 };
 
-export const validateWord = async (word) => {
+export const validateWord = async (word, playerName) => {
     try {
         const response = await fetch(`${API_URL}/validate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ word }),
+            body: JSON.stringify({ word, playerName }),
         });
         return await response.json();
     } catch (error) {
