@@ -20,6 +20,8 @@ function App() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [theme, setTheme] = useState('auto'); // 'light', 'dark', 'auto'
 
+  const [playerName, setPlayerName] = useState('');
+
   // Theme effect
   useEffect(() => {
     const applyTheme = () => {
@@ -70,8 +72,13 @@ function App() {
   };
 
   const handleStart = async () => {
+    if (!playerName.trim()) {
+        setMessage({ text: "Introduce tu nombre", type: "warning" });
+        return;
+    }
+
     setMessage({ text: "Cargando...", type: "info" });
-    const data = await startGame();
+    const data = await startGame(playerName);
     if (data.status === 'ok') {
       setBoard(data.board.map(row => row.split('')));
       setTargetWords(data.words);
@@ -81,7 +88,7 @@ function App() {
       setGameActive(true);
       setStartTime(Date.now());
       setElapsedTime(0);
-      setMessage({ text: "¡Encuentra las palabras!", type: "info" });
+      setMessage({ text: `¡Hola ${playerName}, encuentra las palabras!`, type: "info" });
     } else {
       setMessage({ text: "Error al iniciar el juego: " + data.message, type: "error" });
     }
@@ -112,7 +119,7 @@ function App() {
       const formedWord = path.map(cell => board[cell.r][cell.c]).join("");
       
       // Validate
-      const result = await validateWord(formedWord);
+      const result = await validateWord(formedWord, playerName);
       
       if (result.status === 'valid') {
          processFoundWord(formedWord, path);
@@ -201,6 +208,8 @@ function App() {
            formatTime={formatTime}
            foundWordsCount={foundWords.length}
            targetWordsCount={targetWords.length}
+           playerName={playerName}
+           setPlayerName={setPlayerName}
        />
 
        {board.length > 0 && (

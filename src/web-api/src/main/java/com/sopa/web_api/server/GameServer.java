@@ -19,10 +19,8 @@ public class GameServer extends Thread {
     private DatagramSocket socket;
     private boolean running;
 
-    // Store active games or session data if needed. For now, stateless or simple
-    // state.
-    // In a real scenario, we might map client IP/Port to a Game State.
-    // Just for demonstration, let's keep a simple map or just generate on fly.
+    // Map to store player scores: Name -> Score
+    private final Map<String, Integer> playerScores = new HashMap<>();
 
     // Board size
     private static final int SIZE = 15;
@@ -54,14 +52,15 @@ public class GameServer extends Thread {
                 InetAddress clientAddress = packet.getAddress();
                 int clientPort = packet.getPort();
 
-                logger.info("Received from {}:{}: {}", clientAddress, clientPort, received);
+                // logger.info("Received from {}:{}: {}", clientAddress, clientPort, received);
 
-                String response = handleRequest(received);
+                String response = handleRequest(received, clientAddress, clientPort);
                 byte[] responseData = response.getBytes();
 
                 DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, clientAddress,
                         clientPort);
-                logger.info("Sending response to {}:{}: {}", clientAddress, clientPort, response);
+                // logger.info("Sending response to {}:{}: {}", clientAddress, clientPort,
+                // response);
                 socket.send(responsePacket);
 
             } catch (IOException e) {
@@ -70,19 +69,34 @@ public class GameServer extends Thread {
         }
     }
 
-    private String handleRequest(String request) {
+    private String handleRequest(String request, InetAddress address, int port) {
         String[] parts = request.split(":");
         String command = parts[0];
 
-        switch (command) {
-            case "START_GAME":
-                return generateBoard();
-            case "VALIDATE_WORD":
-                if (parts.length < 2)
-                    return "ERROR:Falta Palabra";
-                return validateWord(parts[1]);
-            default:
-                return "ERROR:Comando Desconocido";
+        if ("START_GAME".equals(command)) {
+            String playerName = (parts.length > 1) ? parts[1] : "Unknown";
+            playerScores.put(playerName, 0); // Reset score
+            logger.info("Player {} joined from {}:{}", playerName, address, port);
+            return generateBoard();
+        } else if ("VALIDATE_WORD".equals(command)) {
+            if (parts.length < 3)
+                return "ERROR:Falta Datos";
+            String word = parts[1];
+            String playerName = parts[2];
+
+            String result = validateWord(word);
+
+            if ("VALID".equals(result)) {
+                int score = playerScores.getOrDefault(playerName, 0) + 1;
+                playerScores.put(playerName, score);
+                logger.info("Player {} found word {}. Current Score: {}", playerName, word, score);
+            } else {
+                logger.info("Player {} attempted invalid word {}", playerName, word);
+            }
+
+            return result;
+        } else {
+            return "ERROR:Comando Desconocido";
         }
     }
 
