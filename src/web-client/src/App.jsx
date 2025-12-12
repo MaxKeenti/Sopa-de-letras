@@ -13,6 +13,36 @@ function App() {
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0); // Seconds
   const [showInstructions, setShowInstructions] = useState(true);
+  const [theme, setTheme] = useState('auto'); // 'light', 'dark', 'auto'
+
+  // Theme effect
+  useEffect(() => {
+    const applyTheme = () => {
+      let isDark = false;
+      if (theme === 'auto') {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      } else {
+        isDark = theme === 'dark';
+      }
+      
+      if (isDark) {
+        document.body.classList.add('dark-theme');
+      } else {
+        document.body.classList.remove('dark-theme');
+      }
+    };
+
+    applyTheme();
+
+    // Listener for system changes when in auto mode
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+        if (theme === 'auto') applyTheme();
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme]);
 
   useEffect(() => {
     let interval = null;
@@ -179,6 +209,17 @@ function App() {
           <button onClick={handleStart} disabled={gameActive && foundWords.length < targetWords.length}>
               {gameActive ? "Reiniciar" : "Iniciar Juego"}
           </button>
+          
+          <select 
+             className="theme-selector"
+             value={theme} 
+             onChange={(e) => setTheme(e.target.value)}
+          >
+              <option value="light">Claro</option>
+              <option value="dark">Oscuro</option>
+              <option value="auto">Auto</option>
+          </select>
+
           {gameActive && <div className="timer">Tiempo: {formatTime(elapsedTime)}</div>}
       </div>
 
