@@ -22,12 +22,17 @@ public class GameServer extends Thread {
     // Map to store player scores: Name -> Score
     private final Map<String, Integer> playerScores = new HashMap<>();
 
+    // Map to store active words per player: Name -> List<String>
+    private final Map<String, List<String>> playerWords = new HashMap<>();
+
     // Board size
     private static final int SIZE = 15;
 
-    // Word list
-    private static final List<String> WORDS = Arrays.asList("REDES", "SOCKETS", "UDP", "JAVA", "REACT", "DOCKER",
-            "SERVIDOR", "CLIENTE", "PROTOCOLO", "API");
+    // Master Word list
+    private static final List<String> ALL_WORDS = Arrays.asList("REDES", "SOCKETS", "UDP", "JAVA", "REACT", "DOCKER",
+            "SERVIDOR", "CLIENTE", "PROTOCOLO", "API", "JSON", "XML", "HTML", "CSS", "JS", "TS", "REACT", "ANGULAR",
+            "VUE", "PYTHON", "NODE", "EXPRESS", "REACT", "ANGULAR", "VUE", "PYTHON", "NODE", "EXPRESS", "LINUX",
+            "MAC", "WINDOWS", "IOS", "ANDROID", "IOS", "ANDROID", "IOS", "ANDROID", "IOS", "ANDROID", "IOS", "ANDROID");
 
     public GameServer() {
         try {
@@ -52,15 +57,11 @@ public class GameServer extends Thread {
                 InetAddress clientAddress = packet.getAddress();
                 int clientPort = packet.getPort();
 
-                // logger.info("Received from {}:{}: {}", clientAddress, clientPort, received);
-
                 String response = handleRequest(received, clientAddress, clientPort);
                 byte[] responseData = response.getBytes();
 
                 DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, clientAddress,
                         clientPort);
-                // logger.info("Sending response to {}:{}: {}", clientAddress, clientPort,
-                // response);
                 socket.send(responsePacket);
 
             } catch (IOException e) {
@@ -77,14 +78,14 @@ public class GameServer extends Thread {
             String playerName = (parts.length > 1) ? parts[1] : "Unknown";
             playerScores.put(playerName, 0); // Reset score
             logger.info("Player {} joined from {}:{}", playerName, address, port);
-            return generateBoard();
+            return generateBoard(playerName);
         } else if ("VALIDATE_WORD".equals(command)) {
             if (parts.length < 3)
                 return "ERROR:Falta Datos";
             String word = parts[1];
             String playerName = parts[2];
 
-            String result = validateWord(word);
+            String result = validateWord(word, playerName);
 
             if ("VALID".equals(result)) {
                 int score = playerScores.getOrDefault(playerName, 0) + 1;
@@ -104,6 +105,10 @@ public class GameServer extends Thread {
             saveScore(playerName, time);
             logger.info("Game Over for {}. Time: {}", playerName, time);
 
+            // Clean up player session
+            playerWords.remove(playerName);
+            playerScores.remove(playerName);
+
             return "OK";
         } else {
             return "ERROR:Comando Desconocido";
@@ -120,24 +125,34 @@ public class GameServer extends Thread {
         }
     }
 
-    private String generateBoard() {
+    private String generateBoard(String playerName) {
         char[][] board = new char[SIZE][SIZE];
         Random random = new Random();
 
-        // 1. Initialize board with placeholders (0)
+        // 1. Select 10 random unique words
+        List<String> uniqueWords = new ArrayList<>(new HashSet<>(ALL_WORDS)); // Remove duplicates first
+        Collections.shuffle(uniqueWords);
+        List<String> gameWords = new ArrayList<>();
+        for (int i = 0; i < Math.min(10, uniqueWords.size()); i++) {
+            gameWords.add(uniqueWords.get(i));
+        }
+
+        // Store words for this player
+        playerWords.put(playerName, gameWords);
+
+        // 2. Initialize board with placeholders (0)
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 board[i][j] = 0;
             }
         }
 
-        // 2. Place words with collision checking
-        Collections.shuffle(WORDS); // Shuffle to randomize positions each game
-        for (String word : WORDS) {
+        // 3. Place words with collision checking
+        for (String word : gameWords) {
             placeWord(board, word, random);
         }
 
-        // 3. Fill remaining spots with random letters
+        // 4. Fill remaining spots with random letters
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 if (board[i][j] == 0) {
@@ -153,7 +168,7 @@ public class GameServer extends Thread {
             if (i < SIZE - 1)
                 sb.append(",");
         }
-        sb.append(";").append(String.join(",", WORDS));
+        sb.append(";").append(String.join(",", gameWords));
         return sb.toString();
     }
 
@@ -233,8 +248,12 @@ public class GameServer extends Thread {
         }
     }
 
-    private String validateWord(String word) {
-        return WORDS.contains(word.toUpperCase()) ? "VALID" : "INVALID";
+    private String validateWord(String word, String playerName) {
+        List<String> allowedWords = playerWords.get(playerName);
+        if (allowedWords != null && allowedWords.contains(word.toUpperCase())) {
+            return "VALID";
+        }
+        return "INVALID";
     }
 
     public void stopServer() {

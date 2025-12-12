@@ -1,6 +1,6 @@
 import React from 'react';
 
-const GameControls = ({ gameActive, onStart, theme, onThemeChange, elapsedTime, formatTime, foundWordsCount, targetWordsCount, playerName, setPlayerName }) => {
+const GameControls = ({ gameActive, onStart, theme, onThemeChange, elapsedTime, formatTime, foundWordsCount, targetWordsCount, playerName, setPlayerName, onShowLeaderboard }) => {
     return (
         <div className="flex flex-wrap gap-4 items-center mb-6 w-full max-w-4xl justify-center">
             <div className="flex flex-col">
@@ -16,6 +16,10 @@ const GameControls = ({ gameActive, onStart, theme, onThemeChange, elapsedTime, 
 
             <button className="btn" onClick={onStart} disabled={!playerName.trim() || (gameActive && foundWordsCount < targetWordsCount)}>
                 {gameActive ? "Reiniciar" : "Iniciar Juego"}
+            </button>
+            
+            <button className="btn bg-blue-500 hover:bg-blue-600 border-none" onClick={onShowLeaderboard}>
+                Ver Puntajes
             </button>
             
             <div className="flex items-center gap-2">
