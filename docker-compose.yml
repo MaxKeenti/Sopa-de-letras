@@ -7,6 +7,8 @@ services:
       - "9876:9876/udp"
     networks:
       - sopa-net
+    volumes:
+      - ./scores.txt:/scores.txt
 
   web-client:
     build: 
