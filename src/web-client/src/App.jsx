@@ -11,7 +11,28 @@ function App() {
   const [message, setMessage] = useState({ text: "Presiona Iniciar para Jugar", type: "info" });
   const [gameActive, setGameActive] = useState(false);
   const [startTime, setStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0); // Seconds
   const [showInstructions, setShowInstructions] = useState(true);
+
+  useEffect(() => {
+    let interval = null;
+    if (gameActive && startTime) {
+      interval = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    } else if (!gameActive) {
+      if (interval) clearInterval(interval);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [gameActive, startTime]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleStart = async () => {
     setMessage({ text: "Cargando...", type: "info" });
@@ -24,6 +45,7 @@ function App() {
       setSelectionStart(null);
       setGameActive(true);
       setStartTime(Date.now());
+      setElapsedTime(0);
       setMessage({ text: "¡Encuentra las palabras!", type: "info" });
     } else {
       setMessage({ text: "Error al iniciar el juego: " + data.message, type: "error" });
@@ -89,8 +111,8 @@ function App() {
            setMessage({ text: `¡Encontrado: ${word}!`, type: "success" });
            
            if (newFound.length === targetWords.length) {
-               const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-               setMessage({ text: `¡Juego Terminado! Tiempo: ${timeTaken}s`, type: "success" });
+               const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+               setMessage({ text: `¡Juego Terminado! Tiempo: ${formatTime(totalSeconds)}`, type: "success" });
                setGameActive(false);
            }
        } else {
@@ -157,6 +179,7 @@ function App() {
           <button onClick={handleStart} disabled={gameActive && foundWords.length < targetWords.length}>
               {gameActive ? "Reiniciar" : "Iniciar Juego"}
           </button>
+          {gameActive && <div className="timer">Tiempo: {formatTime(elapsedTime)}</div>}
       </div>
 
       <div className={`message-banner ${message.type}`}>
